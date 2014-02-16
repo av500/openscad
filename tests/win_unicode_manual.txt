@@ -1,0 +1,85 @@
+# Regression tests for Windows Unicode
+# currently we have to run these by hand.
+# It can be the basis for creating automated tests in the future
+
+1. cmdline file
+
+- Create a file named ффф.scad with contents 'cube();'
+- (you can do this by copy-paste the text above into 'file/save as' in
+   Windows Notepad tool)
+- Open the windows command prompt (run/cmd)
+- set PATH=%PATH%;c:\program files\openscad
+- openscad.exe ффф.scad -o "ффф .stl"
+
+Expected result: 
+
+- type 'dir', it should show a file named ффф .stl
+
+2. .com wrapper
+
+repeat test 1 but type 'openscad.com' instead of 'openscad.exe'
+ and use ддд instead of ффф
+
+3. .com autowrapping
+
+repeaet test 2 but type 'openscad' instead of 'openscad.com' or 'openscad.exe'
+
+4. output
+
+-mkdir c:\temp1 and c:\temp2
+-Run openscad
+-cube();
+-Hit f6
+-Design/export as stl to a filename "c:/temp1/ффф .stl"
+-Open Explorer to see if the file saved to the folder c:\temp
+-Open the file, see if the contents are ordinary STL
+
+5. import full path
+
+-Run test 4
+-import( "c:/temp1/ффф .stl" );
+
+6. OPENSCADPATH
+
+-mkdir c:\temp1 and c:\temp2
+-use windows system utils to edit OPENSCADPATH to be c:\temp1;c:\temp2
+-make a STL file named " ффф1 .stl" under c:\temp1
+-make a STL file named " ффф2 .stl" under c:\temp2
+-Run openscad
+-import( " ффф1 .stl" );
+-import( " ффф2 .stl" );
+
+7. Dependency (-D)
+
+??????
+see that bug report with double quotes
+
+
+Section 2: OpenSCAD GUI tests
+
+
+8. cmdline->gui
+
+Run test 6. 
+From cmdline run 'openscad "c:\temp1\ ффф1 .stl"'
+Result: Openscad GUI opens with proper title, contents of file, and proper
+text in OpenSCAD text output pane.
+
+9. GUI save
+
+Re-run test 4
+Check the OpenSCAD text output pane
+The filename should be correctly displayed
+
+10. GUI open
+
+Run openscad
+Go to file/open
+find the file from test1
+open it
+
+Result: filename should be properly displayed
+and contents should load
+
+
+

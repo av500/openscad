@@ -120,17 +120,39 @@ FILE *PlatformUtils::fopen( const char *utf8path, const char *mode )
 
 int PlatformUtils::stat( const char *utf8path, void *buf )
 {
-        return stat( utf8path, (PlatformUtils::struct_stat *)buf );
+        return ::stat( utf8path, (PlatformUtils::struct_stat *)buf );
 }
 
 int PlatformUtils::getpid()
 {
         return ::getpid();
 }
-#endif // __PLATFORM_WIN__
+
+int PlatformUtils::system(const char * utf8path)
+{
+	return ::system(utf8path);
+}
+
+std::string PlatformUtils::getenv( const char * varname )
+{
+	char * env = ::getenv( varname );
+	if (env==NULL) return "";
+	return std::string(env);
+}
+
+const char * PlatformUtils::pathsep()
+{
+        return ":";
+}
+
+bool PlatformUtils::runningUnderWine()
+{
+	return false;
+}
+#endif // ndef __PLATFORM_WIN__
+
 
 // info - place at bottom of file to isolate ifdefs, includes
-
 #include "version_check.h"
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -207,7 +229,7 @@ std::string PlatformUtils::info()
 	  << "\nQt version: " << qtVersion
 	  << "\nMingW build: " << mingwstatus
 	  << "\nGLib version: "       << GLIB_MAJOR_VERSION << "." << GLIB_MINOR_VERSION << "." << GLIB_MICRO_VERSION
-	  << "\nOPENSCADPATH: " << getenv("OPENSCADPATH") << "\n"
+	  << "\nOPENSCADPATH: " << PlatformUtils::getenv("OPENSCADPATH") << "\n"
 	;
 	return s.str();
 }

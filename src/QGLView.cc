@@ -70,15 +70,6 @@ void QGLView::init()
   this->statusLabel = NULL;
 
   setMouseTracking(true);
-
-// see paintGL() + issue160 + wine FAQ
-#ifdef _WIN32
-#include <windows.h>
-  HMODULE hntdll = GetModuleHandle(L"ntdll.dll");
-  if (hntdll)
-    if ( (void *)GetProcAddress(hntdll, "wine_get_version") )
-      running_under_wine = true;
-#endif
 }
 
 void QGLView::resetView()
@@ -167,7 +158,7 @@ void QGLView::paintGL()
     statusLabel->setText(msg);
   }
 
-  if (running_under_wine) swapBuffers();
+  if (PlatformUtils::runningUnderWine()) swapBuffers();
 }
 
 void QGLView::keyPressEvent(QKeyEvent *event)

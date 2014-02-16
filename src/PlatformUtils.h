@@ -11,16 +11,20 @@ namespace PlatformUtils {
 	bool createLibraryPath();
 	std::string backupPath();
 	bool createBackupPath();
-	std::string info();
 	void resetArgvToUtf8( int argc, char ** &argv, std::vector<std::string> &argstorage );
 	FILE *fopen( const char *utf8path, const char *mode );
 	std::string formatDouble( const double &x );
+	std::string getenv( const char * varname );
 	int stat(const char *utf8path, void *buf);
+	int system(const char *utf8path);
+	bool runningUnderWine();
+	const char * pathsep();
+	std::string info();
 	int getpid();
 }
 
 
-// Detect various compilers indicating a Windows target and set __PLATFORM_WIN__
+// Define __PLATFORM_WIN__ for Windows(TM) builds
 #if defined (__MINGW32__) || defined (__MINGW64__)
 #define __PLATFORM_MINGW__
 #endif
@@ -29,7 +33,7 @@ namespace PlatformUtils {
 #endif // MINGW32 || MINGW64
 
 
-// portable version of POSIX stat() requires custom struct_stat
+// POSIX stat() (requires altered struct_stat)
 #if defined (__PLATFORM_WIN__)
 namespace PlatformUtils { typedef struct _stat struct_stat; }
 #else
@@ -37,14 +41,21 @@ namespace PlatformUtils { typedef struct stat struct_stat; }
 #endif // __PLATFORM_WIN__
 
 
-// portable snprintf
+// integer types
+#ifdef __PLATFORM_WIN__
+typedef __int64 int64_t;
+#else
+#include <stdint.h>
+#endif
+
+
+// snprintf
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
 
 
-// portable version of ifstream/ofstream
-// MingW ifstream/ofstream: see ../doc/windows_issues.txt & ../patches/minsgream
+// ifstream/ofstream for MingW: see ../doc/windows_issues.txt
 #ifdef __PLATFORM_MINGW__
 #include "../patches/mingstream"
 namespace PlatformUtils {

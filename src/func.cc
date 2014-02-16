@@ -34,6 +34,7 @@
 #include <algorithm>
 #include "stl-utils.h"
 #include "printutils.h"
+#include "PlatformUtils.h"
 #include <boost/foreach.hpp>
 
 /*
@@ -48,17 +49,8 @@
 /*Unicode support for string lengths and array accesses*/
 #include <glib.h>
 
-#ifdef __WIN32__
-#include <process.h>
-int process_id = _getpid();
-#else
-#include <sys/types.h>
-#include <unistd.h>
-int process_id = getpid();
-#endif
-
 boost::mt19937 deterministic_rng;
-boost::mt19937 lessdeterministic_rng( std::time(0) + process_id );
+boost::mt19937 lessdeterministic_rng( std::time(0) + PlatformUtils::getpid() );
 
 AbstractFunction::~AbstractFunction()
 {

@@ -25,7 +25,12 @@ void handle_dep(const std::string &filename)
 	if (!fs::exists(filepath) && make_command) {
 		std::stringstream buf;
 		buf << make_command << " '" << boost::regex_replace(filename, boost::regex("'"), "'\\''") << "'";
-		system(buf.str().c_str()); // FIXME: Handle error
+		int status = PlatformUtils::system(buf.str().c_str());
+		//PRINTDB("handle_dep system() status: %i",status);
+		if (status==-1) {
+			PRINTB("ERROR: handling dependency failed for %s",filename);
+			PRINTB("ERROR: make_command was: %s",make_command);
+		}
 	}
 }
 

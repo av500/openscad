@@ -142,5 +142,42 @@ int PlatformUtils::stat( const char *utf8path, void *buf )
 
 int PlatformUtils::getpid()
 {
-        int process_id = _getpid();
+	return _getpid();
 }
+
+int PlatformUtils::system(const char * utf8path)
+{
+	std::wstring winpath;
+	winpath = utf8_to_winapi_wstring( std::string( utf8path ) );
+        return _wsystem(winpath.c_str());
+}
+
+std::string getenv( const char * varname )
+{
+	const wchar_t * wenv = _wgetenv(varname.c_str());
+	std::wstring wenvstr(wenv);
+	std::string utf8path;
+	utf8path = winapi_wstring_to_utf8( std::string( utf8path ) );
+	return utf8path;
+}
+
+const char * pathsep()
+{
+	return ";";
+}
+
+// are we running under the Wine system (as opposed to Windows(TM))?
+// result is cached. see issue160 / wine faq.
+static int wine_status = 0;
+bool runningUnderWine()
+{
+	if (wine_status==0) {
+		HMODULE hntdll = GetModuleHandle(L"ntdll.dll");
+		if (hntdll)
+			if ( (void *)GetProcAddress(hntdll, "wine_get_version") )
+				wine_status = 1;
+	}
+	if (wine_status==1) return true;
+	return false;
+}
+

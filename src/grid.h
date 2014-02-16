@@ -2,11 +2,7 @@
 #define GRID_H_
 
 #include "mathc99.h"
-#ifdef WIN32
-typedef __int64 int64_t;
-#else
-#include <stdint.h>
-#endif
+#include "PlatformUtils.h"
 #include <stdlib.h>
 #include <boost/unordered_map.hpp>
 #include <utility>

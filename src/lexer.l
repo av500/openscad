@@ -40,7 +40,7 @@ namespace fs = boost::filesystem;
 #include "boosty.h"
 #include "PlatformUtils.h"
 
-//isatty for visual c++ and mingw-cross-env
+//isatty for visual c++ and mingw-cross-env (mingw32 only)
 #if defined __WIN32__ && ! defined _MSC_VER
 #include "unistd.h"
 #endif
