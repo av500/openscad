@@ -4,7 +4,7 @@
 
 1. cmdline file
 
-- Create a file named ффф.scad with contents 'cube();'
+- Create a file named ффф.scad with contents 'cube();echo("ффф file");'
 - (you can do this by copy-paste the text above into 'file/save as' in
    Windows Notepad tool)
 - Open the windows command prompt (run/cmd)
