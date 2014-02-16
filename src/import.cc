@@ -191,9 +191,8 @@ PolySet *ImportNode::evaluate_polyset(class PolySetEvaluator *) const
 	{
 		handle_dep((std::string)this->filename);
 		// Open file and position at the end
-		PlatformUtils::ifstream f(this->filename.c_str(), std::ios::in );
-		f.
-| std::ios::binary | std::ios::ate);
+		PlatformUtils::ifstream f(this->filename.c_str());
+		f.seekg( std::streamoff(0), std::ios::end );
 		if (!f.good()) {
 			PRINTB("WARNING: Can't open import file '%s'.", this->filename);
 			return p;

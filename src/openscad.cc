@@ -69,10 +69,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 #include "boosty.h"
-
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
+#include "PlatformUtils.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -84,10 +81,10 @@ using std::vector;
 using boost::lexical_cast;
 using boost::is_any_of;
 
-class Echostream : public std::ofstream
+class Echostream : public PlatformUtils::ofstream
 {
 public:
-	Echostream( const char * filename ) : std::ofstream( filename ) {
+	Echostream( const char * filename ) : PlatformUtils::ofstream( filename ) {
 		set_output_handler( &Echostream::output, this );
 	}
 	static void output( const std::string &msg, void *userdata ) {
@@ -256,7 +253,7 @@ int cmdline(const char *deps_output_file, const std::string &filename, Camera &c
 
 	handle_dep(filename.c_str());
 
-	std::ifstream ifs(filename.c_str());
+	PlatformUtils::ifstream ifs(filename.c_str());
 	if (!ifs.is_open()) {
 		PRINTB("Can't open input file '%s'!\n", filename.c_str());
 		return 1;
@@ -288,7 +285,7 @@ int cmdline(const char *deps_output_file, const std::string &filename, Camera &c
 
 	if (csg_output_file) {
 		fs::current_path(original_path);
-		std::ofstream fstream(csg_output_file);
+		PlatformUtils::ofstream fstream(csg_output_file);
 		if (!fstream.is_open()) {
 			PRINTB("Can't open file \"%s\" for export", csg_output_file);
 		}
@@ -300,7 +297,7 @@ int cmdline(const char *deps_output_file, const std::string &filename, Camera &c
 	}
 	else if (ast_output_file) {
 		fs::current_path(original_path);
-		std::ofstream fstream(ast_output_file);
+		PlatformUtils::ofstream fstream(ast_output_file);
 		if (!fstream.is_open()) {
 			PRINTB("Can't open file \"%s\" for export", ast_output_file);
 		}
@@ -318,7 +315,7 @@ int cmdline(const char *deps_output_file, const std::string &filename, Camera &c
 		shared_ptr<CSGTerm> root_raw_term = csgRenderer.evaluateCSGTerm(*root_node, highlight_terms, background_terms);
 
 		fs::current_path(original_path);
-		std::ofstream fstream(term_output_file);
+		PlatformUtils::ofstream fstream(term_output_file);
 		if (!fstream.is_open()) {
 			PRINTB("Can't open file \"%s\" for export", term_output_file);
 		}
@@ -369,7 +366,7 @@ int cmdline(const char *deps_output_file, const std::string &filename, Camera &c
 				PRINT("Object isn't a valid 2-manifold! Modify your design.\n");
 				return 1;
 			}
-			std::ofstream fstream(stl_output_file);
+			PlatformUtils::ofstream fstream(stl_output_file);
 			if (!fstream.is_open()) {
 				PRINTB("Can't open file \"%s\" for export", stl_output_file);
 			}
@@ -388,7 +385,7 @@ int cmdline(const char *deps_output_file, const std::string &filename, Camera &c
 				PRINT("Object isn't a valid 2-manifold! Modify your design.\n");
 				return 1;
 			}
-			std::ofstream fstream(off_output_file);
+			PlatformUtils::ofstream fstream(off_output_file);
 			if (!fstream.is_open()) {
 				PRINTB("Can't open file \"%s\" for export", off_output_file);
 			}
@@ -403,7 +400,7 @@ int cmdline(const char *deps_output_file, const std::string &filename, Camera &c
 				PRINT("Current top level object is not a 2D object.\n");
 				return 1;
 			}
-			std::ofstream fstream(dxf_output_file);
+			PlatformUtils::ofstream fstream(dxf_output_file);
 			if (!fstream.is_open()) {
 				PRINTB("Can't open file \"%s\" for export", dxf_output_file);
 			}
@@ -414,7 +411,7 @@ int cmdline(const char *deps_output_file, const std::string &filename, Camera &c
 		}
 
 		if (png_output_file) {
-			std::ofstream fstream(png_output_file,std::ios::out|std::ios::binary);
+			PlatformUtils::ofstream fstream(png_output_file,std::ios::out|std::ios::binary);
 			if (!fstream.is_open()) {
 				PRINTB("Can't open file \"%s\" for export", png_output_file);
 			}

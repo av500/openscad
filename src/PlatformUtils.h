@@ -37,6 +37,12 @@ namespace PlatformUtils { typedef struct stat struct_stat; }
 #endif // __PLATFORM_WIN__
 
 
+// portable snprintf
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
+
+
 // portable version of ifstream/ofstream
 // MingW ifstream/ofstream: see ../doc/windows_issues.txt & ../patches/minsgream
 #ifdef __PLATFORM_MINGW__
