@@ -200,7 +200,7 @@ int cmdline(const char *deps_output_file, const std::string &filename, Camera &c
 {
 #ifdef OPENSCAD_QTGUI
 	QCoreApplication app(argc, argv);
-	const std::string application_path = QApplication::instance()->applicationDirPath().toLocal8Bit().constData();
+	const std::string application_path = QApplication::instance()->applicationDirPath().toUtf8().constData();
 #else
 	const std::string application_path = boosty::stringy(boosty::absolute(boost::filesystem::path(argv[0]).parent_path()));
 #endif
