@@ -1,13 +1,14 @@
 #include "PlatformUtils.h"
 #include "printutils.h"
 #include <windows.h>
+#include <process.h>
 #ifndef _WIN32_IE
 #define _WIN32_IE 0x0501 // SHGFP_TYPE_CURRENT
 #endif
 #include <shlobj.h>
 
 // convert from windows api w_char strings (usually utf16) to utf8 std::string
-std::string winapi_wstr_to_utf8( std::wstring wstr )
+std::string winapi_wstring_to_utf8( const std::wstring &wstr )
 {
 	UINT CodePage = CP_UTF8;
 	DWORD dwFlags = 0;
@@ -21,7 +22,7 @@ std::string winapi_wstr_to_utf8( std::wstring wstr )
 	int numbytes = WideCharToMultiByte( CodePage, dwFlags, lpWideCharStr,
 	  cchWideChar, lpMultiByteStr, cbMultiByte, lpDefaultChar, lpUsedDefaultChar );
 
-	//PRINTB("utf16 to utf8 conversion: numbytes %i",numbytes);
+	//PRINTDB("utf16 to utf8 conversion: numbytes %i",numbytes);
 
 	std::string utf8_str(numbytes,0);
 	lpMultiByteStr = &utf8_str[0];
@@ -38,6 +39,35 @@ std::string winapi_wstr_to_utf8( std::wstring wstr )
 	return utf8_str;
 }
 
+// convert from utf8 std::string to windows api w_char strings (usually utf16)
+std::wstring utf8_to_winapi_wstring( const std::string &utf8str )
+{
+	UINT CodePage = CP_UTF8;
+	DWORD dwFlags = 0;
+	LPCSTR lpMultiByteStr = &utf8str[0];
+	int cbMultiByte = utf8str.size();
+	LPWSTR lpWideCharStr = NULL;
+	int cchWideChar = 0;
+
+	int numchars = MultiByteToWideChar( CodePage, dwFlags, lpMultiByteStr,
+	  cbMultiByte, lpWideCharStr, cchWideChar );
+
+	//PRINTDB("utf8 to utf16 conversion: numchars %i",numchars);
+
+	std::wstring wstr(numchars,0);
+	lpWideCharStr = &wstr[0];
+	cchWideChar = numchars;
+
+	int result = MultiByteToWideChar( CodePage, dwFlags, lpMultiByteStr,
+	  cbMultiByte, lpWideCharStr, cchWideChar );
+
+	if (result != numchars) {
+		PRINT("ERROR: error converting utf8 to w_char string");
+		PRINTB("ERROR: error code %i",GetLastError());
+	}
+
+	return wstr;
+}
 
 // retrieve the path to 'My Documents' for the current user under windows
 // In XP this is 'c:\documents and settings\username\my documents'
@@ -60,11 +90,57 @@ std::string PlatformUtils::documentsPath()
 	if (result == S_OK) {
 		path = std::wstring( path.c_str() ); // stip extra NULLs
 		//std::wcerr << "wchar path:" << "\n";
-		retval = winapi_wstr_to_utf8( path );
-		//PRINTB("Path found: %s",retval);
+		retval = winapi_wstring_to_utf8( path );
+		//PRINTDB("Path found: %s",retval);
 	} else {
 		PRINT("ERROR: Could not find My Documents location");
 		retval = "";
 	}
 	return retval;
+}
+
+/* alter argv so it points to utf8-encoded versions of command line arguments.
+   'storage' provides a place to store the newly encoded argument strings.
+   argc is ignored for windows(TM). see doc/windows_issues.txt for more info */
+void PlatformUtils::resetArgvToUtf8( int argc, char ** &argv, std::vector<std::string> &storage )
+{
+	int wargc;
+        wchar_t * wcmdline = GetCommandLineW();
+        wchar_t ** wargv = CommandLineToArgvW( wcmdline, &wargc );
+	if (wargc>argc) {
+		printf("utf8 commandline conversion failure. wargc>argc");
+		wargc = argc;
+	}
+        for (int i=0;i<wargc;i++) {
+		std::wstring wstr( wargv[i] );
+		std::string utf8str = winapi_wstring_to_utf8( wstr );
+                storage.push_back( utf8str );
+                argv[i] = const_cast<char *>(storage[i].c_str());
+        }
+}
+
+/* allow fopen() to work with unicode filenames on windows(TM) by
+transcoding to UTF16 and then using _wfopen(). See also: ifstream/ofstream */
+FILE *PlatformUtils::fopen( const char *utf8path, const char *mode )
+{
+	std::wstring winpath;
+	std::wstring winmode;
+	winpath = utf8_to_winapi_wstring( std::string( utf8path ) );
+	winmode = utf8_to_winapi_wstring( std::string( mode ) );
+	return _wfopen( winpath.c_str() , winmode.c_str() );
+}
+
+/* allow stat() to work with unicode filenames on windows(TM) by
+transcoding to UTF16 and then using _wstat(). Note we also have to
+use a wrapped version of struct stat in PlatformUtils.h */
+int PlatformUtils::stat( const char *utf8path, void *buf )
+{
+	std::wstring winpath;
+	winpath = utf8_to_winapi_wstring( std::string( utf8path ) );
+	return _wstat( winpath.c_str(), (PlatformUtils::struct_stat *)buf );
+}
+
+int PlatformUtils::getpid()
+{
+        int process_id = _getpid();
 }

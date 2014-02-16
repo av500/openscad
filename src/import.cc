@@ -52,6 +52,7 @@ namespace fs = boost::filesystem;
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign; // bring 'operator+=()' into scope
 #include "boosty.h"
+#include "PlatformUtils.h"
 
 #include <boost/detail/endian.hpp>
 #include <boost/cstdint.hpp>
@@ -171,7 +172,7 @@ void uint32_byte_swap( uint32_t &x )
 #endif
 }
 
-void read_stl_facet( std::ifstream &f, stl_facet &facet )
+void read_stl_facet( PlatformUtils::ifstream &f, stl_facet &facet )
 {
 	f.read( (char*)facet.data8, STL_FACET_NUMBYTES );
 #ifdef BOOST_BIG_ENDIAN
@@ -190,7 +191,9 @@ PolySet *ImportNode::evaluate_polyset(class PolySetEvaluator *) const
 	{
 		handle_dep((std::string)this->filename);
 		// Open file and position at the end
-		std::ifstream f(this->filename.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
+		PlatformUtils::ifstream f(this->filename.c_str(), std::ios::in );
+		f.
+| std::ios::binary | std::ios::ate);
 		if (!f.good()) {
 			PRINTB("WARNING: Can't open import file '%s'.", this->filename);
 			return p;
@@ -276,7 +279,7 @@ PolySet *ImportNode::evaluate_polyset(class PolySetEvaluator *) const
 	{
 #ifdef ENABLE_CGAL
 		CGAL_Polyhedron poly;
-		std::ifstream file(this->filename.c_str(), std::ios::in | std::ios::binary);
+		PlatformUtils::ifstream file(this->filename.c_str(), std::ios::in | std::ios::binary);
 		if (!file.good()) {
 			PRINTB("WARNING: Can't open import file '%s'.", this->filename);
 		}

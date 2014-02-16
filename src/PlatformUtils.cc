@@ -2,6 +2,34 @@
 #include "boosty.h"
 
 #include <glib.h>
+#include <sstream>
+
+// types/stat/unistd: stat(), getpid()
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+/* Quick and dirty hack to work around floating point rounding differences
+ across platforms for testing purposes. */
+std::string PlatformUtils::formatDouble( const double &op1 )
+{
+	std::stringstream tmp;
+	tmp.precision(12);
+	tmp.setf(std::ios_base::fixed);
+	tmp << op1;
+	std::string tmpstr = tmp.str();
+	size_t endpos = tmpstr.find_last_not_of('0');
+	if (endpos != std::string::npos && tmpstr[endpos] == '.') endpos--;
+	tmpstr = tmpstr.substr(0, endpos+1);
+	size_t dotpos = tmpstr.find('.');
+	if (dotpos != std::string::npos) {
+		if (tmpstr.size() - dotpos > 12) tmpstr.erase(dotpos + 12);
+		while (tmpstr[tmpstr.size()-1] == '0') tmpstr.erase(tmpstr.size()-1);
+	}
+	if ( tmpstr.compare("-0") == 0 ) tmpstr = "0";
+	tmpstr = two_digit_exp_format( tmpstr );
+	return tmpstr;
+}
 
 bool PlatformUtils::createLibraryPath()
 {
@@ -74,6 +102,34 @@ bool PlatformUtils::createBackupPath()
 	}
 	return OK;
 }
+
+#ifndef __PLATFORM_WIN__
+void PlatformUtils::resetArgvToUtf8( int argc, char ** &argv, std::vector<std::string> &argstorage )
+{
+        // do nothing on non-windows platforms
+        (void) argc;
+        (void) argv;
+        (void) argstorage;
+        return;
+}
+
+FILE *PlatformUtils::fopen( const char *utf8path, const char *mode )
+{
+        return std::fopen( utf8path, mode );
+}
+
+int PlatformUtils::stat( const char *utf8path, void *buf )
+{
+        return stat( utf8path, (PlatformUtils::struct_stat *)buf );
+}
+
+int PlatformUtils::getpid()
+{
+        return ::getpid();
+}
+#endif // __PLATFORM_WIN__
+
+// info - place at bottom of file to isolate ifdefs, includes
 
 #include "version_check.h"
 #define STRINGIFY(x) #x

@@ -8,6 +8,7 @@
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 #include "boosty.h"
+#include "PlatformUtils.h"
 
 boost::unordered_set<std::string> dependencies;
 const char *make_command = NULL;
@@ -30,7 +31,7 @@ void handle_dep(const std::string &filename)
 
 bool write_deps(const std::string &filename, const std::string &output_file)
 {
-	FILE *fp = fopen(filename.c_str(), "wt");
+	FILE *fp = PlatformUtils::fopen(filename.c_str(), "wt");
 	if (!fp) {
 		fprintf(stderr, "Can't open dependencies file `%s' for writing!\n", filename.c_str());
 		return false;
