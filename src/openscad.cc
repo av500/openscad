@@ -411,7 +411,7 @@ int cmdline(const char *deps_output_file, const std::string &filename, Camera &c
 		}
 
 		if (png_output_file) {
-			PlatformUtils::ofstream fstream(png_output_file,std::ios::out|std::ios::binary);
+			PlatformUtils::ofstream fstream(png_output_file);
 			if (!fstream.is_open()) {
 				PRINTB("Can't open file \"%s\" for export", png_output_file);
 			}

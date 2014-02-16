@@ -27,6 +27,7 @@
 #include "QGLView.h"
 #include "Preferences.h"
 #include "renderer.h"
+#include "PlatformUtils.h"
 
 #include <QApplication>
 #include <QWheelEvent>
@@ -58,8 +59,6 @@ QGLView::QGLView(const QGLFormat & format, QWidget *parent) : QGLWidget(format, 
 {
   init();
 }
-
-static bool running_under_wine = false;
 
 void QGLView::init()
 {

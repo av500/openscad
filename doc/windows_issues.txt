@@ -39,6 +39,17 @@ these details, but as of writing (early 2014) there aren't any. There
 are many ways to deal with this, and numerous websites discuss the 
 various alternative approaches. 
 
+00. Windows(TM) unicode conventions
+
+A large number of documents about programming with unicode on 
+Windows(TM) will discuss things like tchars, _T macros, "Ansi" mode 
+building vs 'Unicode' building, 'UNICODE' macros, functions that end 
+with DeleteFileA vs DeleteFileW, etc etc. The OpenSCAD strategy (as of 
+writing) is to avoid tchars completely, build only for 'Unicode mode', 
+convert everything to UTF8 for processing internally, and only convert 
+to UTF16 when we need to call Windows functions, all of which should be 
+the 'w' version (_wfopen for example).
+
 0. Program Startup, main(), Command Line arguments, and Unicode
 
 Windows has multiple different 'entry points' for historical reasons, 

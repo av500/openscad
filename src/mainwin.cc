@@ -558,7 +558,7 @@ MainWindow::setFileName(const QString &filename)
 			this->fileName = fileinfo.fileName();
 		}
 		
-		this->top_ctx.setDocumentPath(fileinfo.dir().absolutePath().toLocal8Bit().constData());
+		this->top_ctx.setDocumentPath(fileinfo.dir().absolutePath().toUtf8().constData());
 		QDir::setCurrent(fileinfo.dir().absolutePath());
 	}
 
@@ -622,13 +622,13 @@ void MainWindow::refreshDocument()
 		QFile file(this->fileName);
 		if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 			PRINTB("Failed to open file %s: %s", 
-						 this->fileName.toLocal8Bit().constData() % file.errorString().toLocal8Bit().constData());
+						 this->fileName.toUtf8().constData() % file.errorString().toUtf8().constData());
 		}
 		else {
 			QTextStream reader(&file);
 			reader.setCodec("UTF-8");
 			QString text = reader.readAll();
-			PRINTB("Loaded design '%s'.", this->fileName.toLocal8Bit().constData());
+			PRINTB("Loaded design '%s'.", this->fileName.toUtf8().constData());
 			editor->setPlainText(text);
 		}
 	}
@@ -1020,7 +1020,7 @@ void MainWindow::writeBackup(QFile *file)
 	writer.setCodec("UTF-8");
 	writer << this->editor->toPlainText();
 	
-	PRINTB("Saved backup file: %s", file->fileName().toLocal8Bit().constData());
+	PRINTB("Saved backup file: %s", file->fileName().toUtf8().constData());
 }
 
 void MainWindow::saveBackup()
@@ -1055,7 +1055,7 @@ void MainWindow::saveBackup()
 	QFile file(backupPath);
 
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-		PRINTB("WARNING: Failed to open backup file for writing: %s (%s)", backupPath.toLocal8Bit().constData() % file.errorString().toLocal8Bit().constData());
+		PRINTB("WARNING: Failed to open backup file for writing: %s (%s)", backupPath.toUtf8().constData() % file.errorString().toUtf8().constData());
 		return;
 	}
 
@@ -1072,7 +1072,7 @@ void MainWindow::actionSave()
 		setCurrentOutput();
 		QFile file(this->fileName);
 		if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
-			PRINTB("Failed to open file for writing: %s (%s)", this->fileName.toLocal8Bit().constData() % file.errorString().toLocal8Bit().constData());
+			PRINTB("Failed to open file for writing: %s (%s)", this->fileName.toUtf8().constData() % file.errorString().toUtf8().constData());
 			QMessageBox::warning(this, windowTitle(), tr("Failed to open file for writing:\n %1 (%2)")
 					.arg(this->fileName).arg(file.errorString()));
 		}
@@ -1080,7 +1080,7 @@ void MainWindow::actionSave()
 			QTextStream writer(&file);
 			writer.setCodec("UTF-8");
 			writer << this->editor->toPlainText();
-			PRINTB("Saved design '%s'.", this->fileName.toLocal8Bit().constData());
+			PRINTB("Saved design '%s'.", this->fileName.toUtf8().constData());
 			this->editor->setContentModified(false);
 		}
 		clearCurrentOutput();
@@ -1282,7 +1282,7 @@ bool MainWindow::fileChangedOnDisk()
 	if (!this->fileName.isEmpty()) {
 		struct stat st;
 		memset(&st, 0, sizeof(struct stat));
-		bool valid = (stat(this->fileName.toLocal8Bit(), &st) == 0);
+		bool valid = (stat(this->fileName.toUtf8(), &st) == 0);
 		// If file isn't there, just return and use current editor text
 		if (!valid) return false;
 
@@ -1305,7 +1305,7 @@ void MainWindow::compileTopLevelDocument()
 	
 	this->last_compiled_doc = editor->toPlainText();
 	std::string fulltext = 
-		std::string(this->last_compiled_doc.toLocal8Bit().constData()) +
+		std::string(this->last_compiled_doc.toUtf8().constData()) +
 		"\n" + commandline_commands;
 	
 	delete this->root_module;
@@ -1314,7 +1314,7 @@ void MainWindow::compileTopLevelDocument()
 	this->root_module = parse(fulltext.c_str(),
 														this->fileName.isEmpty() ? 
 														"" : 
-														QFileInfo(this->fileName).absolutePath().toLocal8Bit(), 
+														QFileInfo(this->fileName).absolutePath().toUtf8(), 
 														false);
 	
 	if (!animate_panel->isVisible()) {
@@ -1549,7 +1549,7 @@ void MainWindow::actionDisplayAST()
 	e->setWindowTitle("AST Dump");
 	e->setReadOnly(true);
 	if (root_module) {
-		e->setPlainText(QString::fromLocal8Bit(root_module->dump("", "").c_str()));
+		e->setPlainText(QString::fromUtf8(root_module->dump("", "").c_str()));
 	} else {
 		e->setPlainText("No AST to dump. Please try compiling first...");
 	}
@@ -1567,7 +1567,7 @@ void MainWindow::actionDisplayCSGTree()
 	e->setWindowTitle("CSG Tree Dump");
 	e->setReadOnly(true);
 	if (this->root_node) {
-		e->setPlainText(QString::fromLocal8Bit(this->tree.getString(*this->root_node).c_str()));
+		e->setPlainText(QString::fromUtf8(this->tree.getString(*this->root_node).c_str()));
 	} else {
 		e->setPlainText("No CSG to dump. Please try compiling first...");
 	}
@@ -1585,11 +1585,11 @@ void MainWindow::actionDisplayCSGProducts()
 	e->setWindowTitle("CSG Products Dump");
 	e->setReadOnly(true);
 	e->setPlainText(QString("\nCSG before normalization:\n%1\n\n\nCSG after normalization:\n%2\n\n\nCSG rendering chain:\n%3\n\n\nHighlights CSG rendering chain:\n%4\n\n\nBackground CSG rendering chain:\n%5\n")
-									.arg(root_raw_term ? QString::fromLocal8Bit(root_raw_term->dump().c_str()) : "N/A", 
-											 root_norm_term ? QString::fromLocal8Bit(root_norm_term->dump().c_str()) : "N/A", 
-											 this->root_chain ? QString::fromLocal8Bit(this->root_chain->dump().c_str()) : "N/A", 
-											 highlights_chain ? QString::fromLocal8Bit(highlights_chain->dump().c_str()) : "N/A", 
-											 background_chain ? QString::fromLocal8Bit(background_chain->dump().c_str()) : "N/A"));
+									.arg(root_raw_term ? QString::fromUtf8(root_raw_term->dump().c_str()) : "N/A", 
+											 root_norm_term ? QString::fromUtf8(root_norm_term->dump().c_str()) : "N/A", 
+											 this->root_chain ? QString::fromUtf8(this->root_chain->dump().c_str()) : "N/A", 
+											 highlights_chain ? QString::fromUtf8(highlights_chain->dump().c_str()) : "N/A", 
+											 background_chain ? QString::fromUtf8(background_chain->dump().c_str()) : "N/A"));
 	e->show();
 	e->resize(600, 400);
 	clearCurrentOutput();
@@ -1661,7 +1661,7 @@ void MainWindow::actionExportSTLorOFF(bool)
 
 	PlatformUtils::ofstream fstream(stl_filename.toUtf8());
 	if (!fstream.is_open()) {
-		PRINTB("Can't open file \"%s\" for export", stl_filename.toLocal8Bit().constData());
+		PRINTB("Can't open file \"%s\" for export", stl_filename.toUtf8().constData());
 	}
 	else {
 		if (stl_mode) export_stl(this->root_N, fstream);
@@ -1714,7 +1714,7 @@ void MainWindow::actionExportDXF()
 
 	PlatformUtils::ofstream fstream(dxf_filename.toUtf8());
 	if (!fstream.is_open()) {
-		PRINTB("Can't open file \"%s\" for export", dxf_filename.toLocal8Bit().constData());
+		PRINTB("Can't open file \"%s\" for export", dxf_filename.toUtf8().constData());
 	}
 	else {
 		export_dxf(this->root_N, fstream);
@@ -1747,7 +1747,7 @@ void MainWindow::actionExportCSG()
 
 	PlatformUtils::ofstream fstream(csg_filename.toUtf8());
 	if (!fstream.is_open()) {
-		PRINTB("Can't open file \"%s\" for export", csg_filename.toLocal8Bit().constData());
+		PRINTB("Can't open file \"%s\" for export", csg_filename.toUtf8().constData());
 	}
 	else {
 		fstream << this->tree.getString(*this->root_node) << "\n";
@@ -1767,7 +1767,7 @@ void MainWindow::actionExportImage()
 	if (img_filename.isEmpty()) {
 		PRINT("No filename specified. Image export aborted.");
 	} else {
-		qglview->save(img_filename.toLocal8Bit().constData());
+		qglview->save(img_filename.toUtf8().constData());
 	}
 	clearCurrentOutput();
 	return;
@@ -2121,7 +2121,7 @@ void MainWindow::consoleOutput(const std::string &msg, void *userdata)
   // originates in a worker thread.
 	MainWindow *thisp = static_cast<MainWindow*>(userdata);
 	QMetaObject::invokeMethod(thisp->console, "append", Qt::QueuedConnection,
-														Q_ARG(QString, QString::fromLocal8Bit(msg.c_str())));
+														Q_ARG(QString, QString::fromUtf8(msg.c_str())));
 }
 
 void MainWindow::setCurrentOutput()

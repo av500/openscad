@@ -152,16 +152,17 @@ int PlatformUtils::system(const char * utf8path)
         return _wsystem(winpath.c_str());
 }
 
-std::string getenv( const char * varname )
+std::string PlatformUtils::getenv( const char * varname )
 {
-	const wchar_t * wenv = _wgetenv(varname.c_str());
-	std::wstring wenvstr(wenv);
-	std::string utf8path;
-	utf8path = winapi_wstring_to_utf8( std::string( utf8path ) );
-	return utf8path;
+	std::string var( varname );
+	std::wstring wvar( utf8_to_winapi_wstring( var ) );
+	wchar_t * wenv = _wgetenv( wvar.c_str() );
+	std::string utf8env;
+	utf8env = winapi_wstring_to_utf8( std::wstring( wenv ) );
+	return utf8env;
 }
 
-const char * pathsep()
+const char * PlatformUtils::pathsep()
 {
 	return ";";
 }
@@ -169,7 +170,7 @@ const char * pathsep()
 // are we running under the Wine system (as opposed to Windows(TM))?
 // result is cached. see issue160 / wine faq.
 static int wine_status = 0;
-bool runningUnderWine()
+bool PlatformUtils::runningUnderWine()
 {
 	if (wine_status==0) {
 		HMODULE hntdll = GetModuleHandle(L"ntdll.dll");
