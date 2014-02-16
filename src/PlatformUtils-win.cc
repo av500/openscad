@@ -147,16 +147,19 @@ int PlatformUtils::getpid()
 
 int PlatformUtils::system(const char * utf8path)
 {
+	if (utf8path==NULL) return -1;
 	std::wstring winpath;
-	winpath = utf8_to_winapi_wstring( std::string( utf8path ) );
+	winpath = utf8_to_winapi_wstring(std::string( utf8path ));
         return _wsystem(winpath.c_str());
 }
 
 std::string PlatformUtils::getenv( const char * varname )
 {
+	if (varname==NULL) return "";
 	std::string var( varname );
 	std::wstring wvar( utf8_to_winapi_wstring( var ) );
 	wchar_t * wenv = _wgetenv( wvar.c_str() );
+	if (wenv==NULL) return "";
 	std::string utf8env;
 	utf8env = winapi_wstring_to_utf8( std::wstring( wenv ) );
 	return utf8env;
@@ -180,5 +183,38 @@ bool PlatformUtils::runningUnderWine()
 	}
 	if (wine_status==1) return true;
 	return false;
+}
+
+
+/* WinConsoleStream - Allow printing of unicode to Windows commandline console.
+ see mainwin.cc console output, openscad.cc 'echostream', and
+ the Wine project source code, under 'programs/cmd/wcmdmain.c'
+ This class is an 'output handler' that printutils.h PRINT/PRINTB can use.
+ It must be assigned on program startup as the output handler.
+ It will attempt to write directly to the current Windows(TM) command line
+ console on the screen, but if that fails, it will assume output has been
+ redirected and print directly to stderr.
+*/
+WinConsoleStream::WinConsoleStream()
+{
+	set_output_handler( &WinConsoleStream::output, this );
+}
+
+void WinConsoleStream::output( const std::string &msg, void *userdata )
+{
+	DWORD out = 0;
+	WinConsoleStream *thisp = static_cast<WinConsoleStream*>(userdata);
+	(void) thisp;
+	std::string nmsg = msg + "\r\n";
+	std::wstring wmsg = utf8_to_winapi_wstring( nmsg );
+	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD result = WriteConsoleW( handle, wmsg.c_str(), wmsg.size(), &out, NULL );
+	if (!result) {
+		fprintf( stderr, "%s\r\n", msg.c_str() );
+	}
+}
+
+WinConsoleStream::~WinConsoleStream()
+{
 }
 

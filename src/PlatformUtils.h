@@ -70,5 +70,12 @@ namespace PlatformUtils {
 #endif // Mingw ifstream/ofstream
 
 
+class WinConsoleStream
+{
+public:
+        WinConsoleStream();
+        static void output( const std::string &msg, void *userdata );
+        ~WinConsoleStream();
+};
 
 #endif // PLATFORMUTILS_H_

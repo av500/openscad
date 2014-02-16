@@ -202,6 +202,7 @@ int cmdline(const char *deps_output_file, const std::string &filename, Camera &c
 	QCoreApplication app(argc, argv);
 	const std::string application_path = QApplication::instance()->applicationDirPath().toUtf8().constData();
 #else
+	(void) argc;
 	const std::string application_path = boosty::stringy(boosty::absolute(boost::filesystem::path(argv[0]).parent_path()));
 #endif
 	parser_init(application_path);
@@ -241,6 +242,12 @@ int cmdline(const char *deps_output_file, const std::string &filename, Camera &c
 #if 0 && DEBUG
 	top_ctx.dump(NULL, NULL);
 #endif
+
+#ifdef __PLATFORM_WIN__
+	shared_ptr<WinConsoleStream> winstream;
+	winstream.reset( new WinConsoleStream() );
+#endif
+
 	shared_ptr<Echostream> echostream;
 	if (echo_output_file)
 		echostream.reset( new Echostream( echo_output_file ) );
@@ -456,8 +463,8 @@ int cmdline(const char *deps_output_file, const std::string &filename, Camera &c
 static QString assemblePath(const fs::path& absoluteBaseDir,
                             const string& fileName) {
   if (fileName.empty()) return "";
-  QString qsDir( boosty::stringy( absoluteBaseDir ).c_str() );
-  QString qsFile( fileName.c_str() );
+  QString qsDir = QString::fromUtf8( boosty::stringy( absoluteBaseDir ).c_str() );
+  QString qsFile = QString::fromUtf8( fileName.c_str() );
   QFileInfo info( qsDir, qsFile ); // if qsfile is absolute, dir is ignored.
   return info.absoluteFilePath();
 }
@@ -518,7 +525,7 @@ int gui(vector<string> &inputFiles, const fs::path &original_path, int argc, cha
 					qexamplesdir = exdir.path();
 				}
 	MainWindow::setExamplesDir(qexamplesdir);
-  parser_init(app_path.toLocal8Bit().constData());
+	parser_init(app_path.toUtf8().constData());
 
 #ifdef Q_OS_MAC
 	installAppleEventHandlers();
@@ -560,6 +567,9 @@ int gui(const vector<string> &inputFiles, const fs::path &original_path, int arg
 
 int main(int argc, char **argv)
 {
+	std::vector<std::string> argstorage;
+	PlatformUtils::resetArgvToUtf8( argc, argv, argstorage );
+
 	int rc = 0;
 #ifdef Q_OS_MAC
 	set_output_handler(CocoaUtils::nslog, NULL);

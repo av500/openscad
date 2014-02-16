@@ -120,7 +120,7 @@ FILE *PlatformUtils::fopen( const char *utf8path, const char *mode )
 
 int PlatformUtils::stat( const char *utf8path, void *buf )
 {
-        return ::stat( utf8path, (PlatformUtils::struct_stat *)buf );
+        return ::stat( utf8path, (struct ::stat *)buf );
 }
 
 int PlatformUtils::getpid()
