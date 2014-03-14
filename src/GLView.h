@@ -50,6 +50,7 @@ public:
 
 	void showCrosshairs();
 	void showAxes();
+	void showGrid();
 	void showSmallaxes();
 
 	virtual bool save(const char *filename) = 0;
@@ -64,6 +65,7 @@ public:
 	double w_h_ratio;
 	bool orthomode;
 	bool showaxes;
+	bool showgrid;
 	bool showfaces;
 	bool showedges;
 	bool showcrosshairs;

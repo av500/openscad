@@ -26,6 +26,11 @@ RenderSettings::RenderSettings()
 	this->colors[CGAL_EDGE_BACK_COLOR] = Color4f(0xff, 0x00, 0x00);
 	this->colors[CGAL_EDGE_2D_COLOR] = Color4f(0xff, 0x00, 0x00);
 	this->colors[CROSSHAIR_COLOR] = Color4f(0x80, 0x00, 0x00);
+	showgrid_x = false;
+	showgrid_y = false;
+	showgrid_z = true;
+	showgrid_auto = false;
+	num_grid_fields = 5;
 }
 
 Color4f RenderSettings::color(RenderColor idx)

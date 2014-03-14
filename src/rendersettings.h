@@ -27,6 +27,12 @@ public:
 
 	unsigned int openCSGTermLimit, img_width, img_height;
 	double far_gl_clip_limit;
+
+	bool showgrid_x;
+	bool showgrid_y;
+	bool showgrid_z;
+	bool showgrid_auto;
+	int num_grid_fields;
 private:
 	RenderSettings();
 	~RenderSettings() {}

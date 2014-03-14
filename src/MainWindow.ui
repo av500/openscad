@@ -316,6 +316,7 @@
     <addaction name="separator"/>
     <addaction name="viewActionShowEdges"/>
     <addaction name="viewActionShowAxes"/>
+    <addaction name="viewActionShowGrid"/>
     <addaction name="viewActionShowCrosshairs"/>
     <addaction name="viewActionAnimate"/>
     <addaction name="separator"/>
@@ -625,6 +626,17 @@
    </property>
    <property name="text">
     <string>Show Axes</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+2</string>
+   </property>
+  </action>
+  <action name="viewActionShowGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Grid</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+2</string>

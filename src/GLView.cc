@@ -20,6 +20,7 @@ GLView::GLView()
   showfaces = true;
   showaxes = false;
   showcrosshairs = false;
+  showgrid = false;
   renderer = NULL;
   cam = Camera();
   far_far_away = RenderSettings::inst()->far_gl_clip_limit;
@@ -342,6 +343,8 @@ void GLView::gimbalCamPaintGL()
 
   if (showaxes) GLView::showAxes();
 
+  if (showgrid) GLView::showGrid();
+
   glDepthFunc(GL_LESS);
   glCullFace(GL_BACK);
   glDisable(GL_CULL_FACE);
@@ -458,6 +461,42 @@ void GLView::showAxes()
   glVertex3d(0, +l, 0);
   glVertex3d(0, 0, -l);
   glVertex3d(0, 0, +l);
+  glEnd();
+}
+
+void GLView::showGrid()
+{
+	float dpi = this->getDPI();
+  glLineWidth(1*dpi);
+  glColor3d(0.5, 0.5, 0.5);
+  double l = 10;///*cam.viewer_distance*/10*dpi/100;
+  int num = RenderSettings::inst()->num_grid_fields;
+  if (num <= 0)
+    return;
+
+  bool grid_auto = RenderSettings::inst()->showgrid_auto;
+  bool grid_x = false;
+  bool grid_y = false;
+  bool grid_z = false;
+  if (!grid_auto) {
+    grid_x = RenderSettings::inst()->showgrid_x;
+    grid_y = RenderSettings::inst()->showgrid_y;
+    grid_z = RenderSettings::inst()->showgrid_z;
+  } else {
+    // handle auto mode here !!!
+  }
+
+  glBegin(GL_LINES);
+  if (grid_z) {
+    for (int i=-num; i<=num; i++) {
+      glVertex3d(-l*num, l*i, 0);
+      glVertex3d(+l*num, l*i, 0);
+    }
+    for (int i=-num; i<=num; i++) {
+      glVertex3d(l*i, -l*num, 0);
+      glVertex3d(l*i, +l*num, 0);
+    }
+  }
   glEnd();
 }
 

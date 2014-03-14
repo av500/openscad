@@ -35,6 +35,11 @@ public slots:
 	void on_updateCheckBox_toggled(bool);
 	void on_snapshotCheckBox_toggled(bool);
 	void on_checkNowButton_clicked();
+	void on_checkBoxGridAuto_toggled(bool on);
+	void on_checkBoxGridX_toggled(bool on);
+	void on_checkBoxGridY_toggled(bool on);
+	void on_checkBoxGridZ_toggled(bool on);
+	void on_lineEditGridNumFields_textChanged(const QString &text);
 
 signals:
 	void requestRedraw() const;

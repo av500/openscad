@@ -82,6 +82,13 @@ Preferences::Preferences(QWidget *parent) : QMainWindow(parent)
 
 	// Setup default settings
 	this->defaultmap["3dview/colorscheme"] = this->colorSchemeChooser->currentItem()->text();
+
+	this->defaultmap["3dview/grid_auto"] = false;
+	this->defaultmap["3dview/grid_x"] = true;
+	this->defaultmap["3dview/grid_y"] = false;
+	this->defaultmap["3dview/grid_z"] = false;
+	this->defaultmap["3dview/num_fields"] = 5;
+
 	this->defaultmap["advanced/opencsg_show_warning"] = true;
 	this->defaultmap["advanced/enable_opencsg_opengl1x"] = true;
 	this->defaultmap["advanced/polysetCacheSize"] = uint(PolySetCache::instance()->maxSize());
@@ -145,6 +152,7 @@ Preferences::Preferences(QWidget *parent) : QMainWindow(parent)
 	this->colorschemes["Sunset"][RenderSettings::CGAL_EDGE_2D_COLOR] = Color4f(0xff, 0x00, 0x00);
 	this->colorschemes["Sunset"][RenderSettings::CROSSHAIR_COLOR] = Color4f(0x80, 0x00, 0x00);
 
+
   // Advanced pane	
 	QValidator *validator = new QIntValidator(this);
 #ifdef ENABLE_CGAL
@@ -157,6 +165,10 @@ Preferences::Preferences(QWidget *parent) : QMainWindow(parent)
 	updateGUI();
 
 	RenderSettings::inst()->setColors(this->colorschemes[getValue("3dview/colorscheme").toString()]);
+	RenderSettings::inst()->showgrid_x = getValue("3dview/grid_x").toBool();
+	RenderSettings::inst()->showgrid_y = getValue("3dview/grid_y").toBool();
+	RenderSettings::inst()->showgrid_z = getValue("3dview/grid_z").toBool();
+	RenderSettings::inst()->showgrid_auto = getValue("3dview/grid_auto").toBool();
 }
 
 Preferences::~Preferences()
@@ -270,6 +282,50 @@ void Preferences::on_colorSchemeChooser_itemSelectionChanged()
 
 	RenderSettings::inst()->setColors(this->colorschemes[scheme]);
 
+	emit requestRedraw();
+}
+
+void Preferences::on_checkBoxGridAuto_toggled(bool on)
+{
+	QSettings settings;
+	settings.setValue("3dview/grid_auto", on);
+	RenderSettings::inst()->showgrid_auto = on;
+	checkBoxGridX->setEnabled(!on);
+	checkBoxGridY->setEnabled(!on);
+	checkBoxGridZ->setEnabled(!on);
+	emit requestRedraw();
+}
+
+void Preferences::on_checkBoxGridX_toggled(bool on)
+{
+	QSettings settings;
+	settings.setValue("3dview/grid_x", on);
+	RenderSettings::inst()->showgrid_x = on;
+	emit requestRedraw();
+}
+
+void Preferences::on_checkBoxGridY_toggled(bool on)
+{
+	QSettings settings;
+	settings.setValue("3dview/grid_y", on);
+	RenderSettings::inst()->showgrid_y = on;
+	emit requestRedraw();
+}
+
+void Preferences::on_checkBoxGridZ_toggled(bool on)
+{
+	QSettings settings;
+	settings.setValue("3dview/grid_z", on);
+	RenderSettings::inst()->showgrid_z = on;
+	emit requestRedraw();
+}
+
+void Preferences::on_lineEditGridNumFields_textChanged(const QString &text)
+{
+	QSettings settings;
+	int num_fields = text.toInt();
+	settings.setValue("3dview/num_fields", num_fields);
+	RenderSettings::inst()->num_grid_fields = abs(num_fields);
 	emit requestRedraw();
 }
 
@@ -447,6 +503,16 @@ void Preferences::updateGUI()
 	this->polysetCacheSizeEdit->setText(getValue("advanced/polysetCacheSize").toString());
 	this->opencsgLimitEdit->setText(getValue("advanced/openCSGLimit").toString());
 	this->forceGoldfeatherBox->setChecked(getValue("advanced/forceGoldfeather").toBool());
+
+	this->checkBoxGridAuto->setChecked(getValue("3dview/grid_auto").toBool());
+	this->checkBoxGridX->setChecked(getValue("3dview/grid_x").toBool());
+	this->checkBoxGridY->setChecked(getValue("3dview/grid_y").toBool());
+	this->checkBoxGridZ->setChecked(getValue("3dview/grid_z").toBool());
+	this->lineEditGridNumFields->setText(getValue("3dview/num_fields").toString());
+
+	this->checkBoxGridX->setEnabled(!this->checkBoxGridAuto->isChecked());
+	this->checkBoxGridY->setEnabled(!this->checkBoxGridAuto->isChecked());
+	this->checkBoxGridZ->setEnabled(!this->checkBoxGridAuto->isChecked());
 }
 
 void Preferences::apply() const

@@ -343,6 +343,7 @@ MainWindow::MainWindow(const QString &filename)
 	connect(this->viewActionThrownTogether, SIGNAL(triggered()), this, SLOT(viewModeThrownTogether()));
 	connect(this->viewActionShowEdges, SIGNAL(triggered()), this, SLOT(viewModeShowEdges()));
 	connect(this->viewActionShowAxes, SIGNAL(triggered()), this, SLOT(viewModeShowAxes()));
+	connect(this->viewActionShowGrid, SIGNAL(triggered()), this, SLOT(viewModeShowGrid()));
 	connect(this->viewActionShowCrosshairs, SIGNAL(triggered()), this, SLOT(viewModeShowCrosshairs()));
 	connect(this->viewActionAnimate, SIGNAL(triggered()), this, SLOT(viewModeAnimate()));
 	connect(this->viewActionTop, SIGNAL(triggered()), this, SLOT(viewAngleTop()));
@@ -438,6 +439,10 @@ MainWindow::loadViewSettings(){
 	if (settings.value("view/showAxes").toBool()) {
 		viewActionShowAxes->setChecked(true);
 		viewModeShowAxes();
+	}
+	if (settings.value("view/showGrid").toBool()) {
+		viewActionShowGrid->setChecked(true);
+		viewModeShowGrid();
 	}
 	if (settings.value("view/showCrosshairs").toBool()) {
 		viewActionShowCrosshairs->setChecked(true);
@@ -1862,6 +1867,14 @@ void MainWindow::viewModeShowAxes()
 	QSettings settings;
 	settings.setValue("view/showAxes",viewActionShowAxes->isChecked());
 	this->qglview->setShowAxes(viewActionShowAxes->isChecked());
+	this->qglview->updateGL();
+}
+
+void MainWindow::viewModeShowGrid()
+{
+	QSettings settings;
+	settings.setValue("view/showGrid",viewActionShowGrid->isChecked());
+	this->qglview->setShowGrid(viewActionShowGrid->isChecked());
 	this->qglview->updateGL();
 }
 
