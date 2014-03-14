@@ -466,13 +466,13 @@ void GLView::showAxes()
 
 void GLView::showGrid()
 {
-	float dpi = this->getDPI();
+  float dpi = this->getDPI();
   glLineWidth(1*dpi);
   glColor3d(0.5, 0.5, 0.5);
-  double l = 10;///*cam.viewer_distance*/10*dpi/100;
-  int num = RenderSettings::inst()->num_grid_fields;
-  if (num <= 0)
-    return;
+  double l = 10; // 10mm
+  int size = RenderSettings::inst()->num_grid_fields;
+  if (!size)
+    size = 1;
 
   bool grid_auto = RenderSettings::inst()->showgrid_auto;
   bool grid_x = false;
@@ -483,18 +483,57 @@ void GLView::showGrid()
     grid_y = RenderSettings::inst()->showgrid_y;
     grid_z = RenderSettings::inst()->showgrid_z;
   } else {
-    // handle auto mode here !!!
+    int x = cam.object_rot.x();
+    int z = cam.object_rot.z();
+    if( (x > 45 && x < 135) || (x > 225 && x < 315) ) {
+      grid_z = true;
+    } else if((z > 45 && z < 135) || (z > 225 && z < 315)) {
+      grid_x = true;
+    } else {
+      grid_y = true;
+    }
   }
+
+  int num = size * 10 / l;
 
   glBegin(GL_LINES);
   if (grid_z) {
+    // XY plane
+    glColor3d(1.0, 0.0, 0.0);
     for (int i=-num; i<=num; i++) {
       glVertex3d(-l*num, l*i, 0);
       glVertex3d(+l*num, l*i, 0);
     }
+    glColor3d(0.0, 1.0, 0.0);
     for (int i=-num; i<=num; i++) {
       glVertex3d(l*i, -l*num, 0);
       glVertex3d(l*i, +l*num, 0);
+    }
+  }
+  if (grid_x) {
+    // YZ plane
+    glColor3d(0.0, 1.0, 0.0);
+    for (int i=-num; i<=num; i++) {
+      glVertex3d(0, -l*num, l*i);
+      glVertex3d(0, +l*num, l*i);
+    }
+    glColor3d(0.0, 0.0, 1.0);
+    for (int i=-num; i<=num; i++) {
+      glVertex3d(0, l*i, -l*num);
+      glVertex3d(0, l*i, +l*num);
+    }
+  }
+  if (grid_y) {
+    // XZ plane
+    glColor3d(1.0, 0.0, 0.0);
+    for (int i=-num; i<=num; i++) {
+      glVertex3d(-l*num, 0, l*i);
+      glVertex3d(+l*num, 0, l*i);
+    }
+    glColor3d(0.0, 0.0, 1.0);
+    for (int i=-num; i<=num; i++) {
+      glVertex3d(l*i, 0, -l*num);
+      glVertex3d(l*i, 0, +l*num);
     }
   }
   glEnd();
