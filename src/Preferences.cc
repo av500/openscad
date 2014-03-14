@@ -169,6 +169,7 @@ Preferences::Preferences(QWidget *parent) : QMainWindow(parent)
 	RenderSettings::inst()->showgrid_y = getValue("3dview/grid_y").toBool();
 	RenderSettings::inst()->showgrid_z = getValue("3dview/grid_z").toBool();
 	RenderSettings::inst()->showgrid_auto = getValue("3dview/grid_auto").toBool();
+	RenderSettings::inst()->num_grid_fields = getValue("3dview/num_fields").toInt();
 }
 
 Preferences::~Preferences()
@@ -323,9 +324,9 @@ void Preferences::on_checkBoxGridZ_toggled(bool on)
 void Preferences::on_lineEditGridNumFields_textChanged(const QString &text)
 {
 	QSettings settings;
-	int num_fields = text.toInt();
+	int num_fields = abs(text.toInt());
 	settings.setValue("3dview/num_fields", num_fields);
-	RenderSettings::inst()->num_grid_fields = abs(num_fields);
+	RenderSettings::inst()->num_grid_fields = num_fields;
 	emit requestRedraw();
 }
 
