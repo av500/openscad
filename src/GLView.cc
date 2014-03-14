@@ -359,7 +359,7 @@ void GLView::gimbalCamPaintGL()
     this->renderer->draw(showfaces, showedges);
 	}
   // Small axis cross in the lower left corner
-  if (showaxes) GLView::showSmallaxes();
+  if (showaxes || showgrid) GLView::showSmallaxes();
 }
 
 void GLView::showSmallaxes()
